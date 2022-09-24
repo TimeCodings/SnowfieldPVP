@@ -1,0 +1,7 @@
+name: SnowfieldPVP
+version: '${project.version}'
+main: dev.timecoding.snowfieldpvp.SnowfieldPVP
+api-version: 1.19
+authors: [ TimeCode ]
+description: A fun Minecraft minigame for winter with friends! [Premium]
+website: timecoding.de

@@ -1,0 +1,69 @@
+##############################################################################
+# ░██████╗███╗░░██╗░█████╗░░██╗░░░░░░░██╗███████╗██╗███████╗██╗░░░░░██████╗░ #
+# ██╔════╝████╗░██║██╔══██╗░██║░░██╗░░██║██╔════╝██║██╔════╝██║░░░░░██╔══██╗ #
+# ╚█████╗░██╔██╗██║██║░░██║░╚██╗████╗██╔╝█████╗░░██║█████╗░░██║░░░░░██║░░██║ #
+# ░╚═══██╗██║╚████║██║░░██║░░████╔═████║░██╔══╝░░██║██╔══╝░░██║░░░░░██║░░██║ #
+# ██████╔╝██║░╚███║╚█████╔╝░░╚██╔╝░╚██╔╝░██║░░░░░██║███████╗███████╗██████╔╝ #
+# ╚═════╝░╚═╝░░╚══╝░╚════╝░░░░╚═╝░░░╚═╝░░╚═╝░░░░░╚═╝╚══════╝╚══════╝╚═════╝░ #
+##############################################################################
+
+##############################################################################################
+# Thank you for purchasing the "SnowfieldPVP" plugin!                                        #
+# If you have any questions or concerns regarding the plugin,                                #
+# feel free to create a support ticket on my Discord server! (https://discord.timecoding.de) #
+# By the way, after successful verification, you will also find a free map for our mini-game #
+# and the source code of the plugin on the Discord server already specified!                 #
+# Thank you for reading and I wish you a lot of fun with my plugin!                          #
+##############################################################################################
+
+#Enables the plugin (Set this to "false" if you want to disable the plugin)
+Enabled: true
+
+#Currently available languages are: German (DE) and English (EN)
+#Choose DE for German and EN for English (if you try something different an english file will get generated)
+#You can change all messages at any time in the languages folder either
+#in the DE or EN folder (depending on what you have selected for this option)
+Language: EN
+
+#Choose where statistics, data and other data should be stored
+Databases:
+  #Valid types:
+  # - Files (if you want to save datas in .yml files) (DEFAULT),
+  # - SQLite (if you want to save datas in a SQLite database),
+  # - MySQL (if you want to save datas in a MySQL database)
+  Selected: "Files"
+  Files:
+    Subfolder:
+      #Enable this if you want to save the datas in a subfolder
+      Enabled: true
+      #Set the name of the subfolder
+      Name: "datas"
+  MySQL:
+    #The host ip adress (if your server is running on localhost try localhost)
+    Host: "localhost"
+    #The MySQL Username
+    User: "root"
+    #The MySQL Password
+    Password: ""
+    #The MySQL Database-Name
+    Database: "snowfield"
+    #The MySQL-Database-Port
+    Port: 3306
+  SQLite:
+    Subfolder:
+      #Enable this if you want to save the datas in a subfolder
+      Enabled: true
+      #Set the name of the subfolder
+      Name: "datas"
+
+Settings:
+
+
+#Set this to "false" if you don't want the plugin stats to be forwarded to bStats
+bStats: true
+
+#Set this to "false" if you want to disable the Update-Notifier (Console & Chat (Administrators))
+Update-Notifier: true
+
+#IMPORTANT: If you change this value, the whole config will be irrevocably reset!
+config-version: 1.0
