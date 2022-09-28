@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileManager {
@@ -59,6 +60,10 @@ public class FileManager {
     public YamlConfiguration toYAMLDatas(){
         if(this.type != null){
             File f = getGeneratedFile();
+            if(!f.exists()){
+                setupFolder();
+                setupFileorFiles();
+            }
             return YamlConfiguration.loadConfiguration(f);
         }else{
             logger.warning("Error while converting to YAMLDatas, because no FileType was selected!");
@@ -70,10 +75,13 @@ public class FileManager {
         if(this.type != null){
             File f = getGeneratedFile();
             try {
+                if(!f.exists()){
+                    setupFolder();
+                    setupFileorFiles();
+                }
                 YamlConfiguration.loadConfiguration(f).save(f);
             } catch (IOException e) {
-                logger.warning("Error while creating new File:");
-                throw new RuntimeException(e);
+                logger.log(Level.SEVERE, "Error while creating new File:", e);
             }
         }else{
             for(SnowFiles f : SnowFiles.values()){
@@ -82,8 +90,7 @@ public class FileManager {
                 try {
                     YamlConfiguration.loadConfiguration(gen).save(gen);
                 } catch (IOException e) {
-                    logger.warning("Error while creating new File:");
-                    throw new RuntimeException(e);
+                    logger.log(Level.SEVERE, "Error while creating new File:", e);
                 }
             }
         }
@@ -107,7 +114,7 @@ public class FileManager {
                 try {
                     gen.createNewFile();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    logger.log(Level.SEVERE, "Error while creating new File:", e);
                 }
             }
         }else{
@@ -121,7 +128,7 @@ public class FileManager {
                     try {
                         gen.createNewFile();
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        logger.log(Level.SEVERE, "Error while creating new File:", e);
                     }
                 }
             }

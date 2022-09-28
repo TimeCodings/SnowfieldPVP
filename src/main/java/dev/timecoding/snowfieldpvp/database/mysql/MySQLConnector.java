@@ -1,6 +1,10 @@
 package dev.timecoding.snowfieldpvp.database.mysql;
 
 import dev.timecoding.snowfieldpvp.SnowfieldPVP;
+import dev.timecoding.snowfieldpvp.database.DatabaseService;
+import dev.timecoding.snowfieldpvp.enums.SnowDatabaseType;
+import dev.timecoding.snowfieldpvp.enums.SnowFiles;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.logging.Logger;
@@ -28,19 +32,6 @@ public class MySQLConnector {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         boolean b = connect();
-        if(b){
-            //Create Tables (MySQL)
-            update("CREATE TABLE IF NOT EXISTS `test` (\r\n"
-                    + "	`VALUE` VARCHAR(100),\r\n"
-                    + "	`VALUE2` LONGTEXT,\r\n"
-                    + "	`VALUE3` LONGTEXT,\r\n"
-                    + "	`VALUE4` LONGTEXT,\r\n"
-                    + "	`VALUE5` VARCHAR(100),\r\n"
-                    + "	`VALUE6` VARCHAR(100),\r\n"
-                    + "	`VALUE7` VARCHAR(100),\r\n"
-                    + "	`VALUE8` VARCHAR(200)\r\n"
-                    + ");");
-        }
     }
 
     public boolean connect() {
@@ -49,8 +40,11 @@ public class MySQLConnector {
             logger.info("Successfully connected to your MySQL-Database!");
             return true;
         }catch (SQLException e) {
-            logger.warning("Error while connecting to your MySQL-Database:");
-            e.printStackTrace();
+            DatabaseService service = plugin.getDatabaseService();
+            service.reset();
+            service.setSelected(SnowDatabaseType.FILES);
+            logger.info("I changed the Database-Type to Files, because I couldnt connect to MySQL!");
+            service.enable();
         }
         return false;
     }
@@ -74,8 +68,16 @@ public class MySQLConnector {
             statement.close();
             return true;
         }catch (SQLException e) {
-            connect();
-            logger.warning("Error while updating your MySQL-Database:");
+            e.printStackTrace();
+            if(!connect()){
+                DatabaseService service = plugin.getDatabaseService();
+                service.reset();
+                service.setSelected(SnowDatabaseType.FILES);
+                logger.info("I changed the Database-Type to Files, because I couldnt connect to MySQL!");
+                service.enable();
+            }else{
+                logger.warning("Error while updating your MySQL-Database, but you got reconnected!");
+            }
         }
         return false;
     }
@@ -86,8 +88,15 @@ public class MySQLConnector {
             Statement statement = connection.createStatement();
             rs = statement.executeQuery(qry);
         }catch (SQLException e) {
-            connect();
-            logger.warning("Error while requesting your MySQL-Database:");
+            if(!connect()){
+                DatabaseService service = plugin.getDatabaseService();
+                service.reset();
+                service.setSelected(SnowDatabaseType.FILES);
+                logger.info("I changed the Database-Type to Files, because I couldnt connect to MySQL! (If such problems persist and you don't know what to do, join my Discord: discord.timecoding.de)");
+                service.enable();
+            }else{
+                logger.warning("Error while querying your MySQL-Database, but you got reconnected!");
+            }
         }
         return rs;
     }

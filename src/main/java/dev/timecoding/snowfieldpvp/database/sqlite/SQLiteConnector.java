@@ -2,14 +2,14 @@ package dev.timecoding.snowfieldpvp.database.sqlite;
 
 import dev.timecoding.snowfieldpvp.SnowfieldPVP;
 import dev.timecoding.snowfieldpvp.config.ConfigHandler;
+import dev.timecoding.snowfieldpvp.database.DatabaseService;
+import dev.timecoding.snowfieldpvp.enums.SnowDatabaseType;
 import dev.timecoding.snowfieldpvp.enums.SnowFiles;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +33,7 @@ public class SQLiteConnector {
     }
 
     public SQLiteConnector setupFolder(){
-        if(folderExists()){
+        if(!folderExists()){
             File f = new File(plugin.getDataFolder()+"//"+subfolderName());
             if(!folderExists() && subfolderEnabled()){
                 boolean created = f.mkdirs();
@@ -57,14 +57,10 @@ public class SQLiteConnector {
     }
 
     public boolean folderExists(){
-        if(this.type != null){
             File f = new File(plugin.getDataFolder()+"//"+subfolderName());
             if(!subfolderEnabled() || subfolderEnabled() && f.exists()){
                 return true;
             }
-        }else{
-            logger.warning("Error while making folderrequest, because no SQLiteType was selected! (API-Request)");
-        }
         return false;
     }
 
@@ -113,7 +109,11 @@ public class SQLiteConnector {
     }
 
     private boolean fileExistsWithEnum(SnowFiles type){
-        return new File(plugin.getDataFolder().toString(), type.name().toString().toLowerCase()+".db").exists();
+        File f = new File(plugin.getDataFolder().toString(), type.name().toString().toLowerCase()+".db");
+        if(subfolderEnabled()){
+            f = new File(plugin.getDataFolder().toString()+"//"+subfolderName(), type.name().toString().toLowerCase()+".db");
+        }
+        return f.exists();
     }
 
     public SnowFiles getType(){
@@ -140,7 +140,7 @@ public class SQLiteConnector {
     public Connection getSQLiteConnection(SnowFiles type) throws ClassNotFoundException, SQLException {
             Class.forName("org.sqlite.JDBC");
             if(fileExistsWithEnum(type)){
-                if(!connection.containsKey(type) && !connection.get(type).isClosed()){
+                if(!connection.containsKey(type)){
                     Connection con = DriverManager.getConnection("jdbc:sqlite:" + getGeneratedFileWithEnum(type).getPath());
                     connection.put(type, con);
                     return con;
@@ -153,13 +153,20 @@ public class SQLiteConnector {
 
     public boolean connect(SnowFiles type){
         try{
+            System.out.println(type);
         Connection c = getSQLiteConnection(type);
         logger.info("Successfully connected to your SQLite-Database! ("+getGeneratedFileWithEnum(type).getName()+")");
         return true;
         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
             logger.log(Level.SEVERE, "Error while getting Connection ("+getGeneratedFileWithEnum(type).getName()+")", e);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error while getting Connection ("+getGeneratedFileWithEnum(type).getName()+")", e);
+            e.printStackTrace();
+                DatabaseService service = plugin.getDatabaseService();
+                service.reset();
+                service.setSelected(SnowDatabaseType.FILES);
+                logger.info("I changed the Database-Type to Files, because I couldnt connect to SQLite! (If such problems persist and you don't know what to do, join my Discord: discord.timecoding.de)");
+                service.enable();
         }
         return false;
     }
@@ -168,7 +175,7 @@ public class SQLiteConnector {
         boolean b = false;
         for(SnowFiles types : SnowFiles.values()){
             boolean c = connect(types);
-            if(!c && !b){
+            if(c && !b){
                 b = true;
             }
         }
@@ -189,6 +196,50 @@ public class SQLiteConnector {
             logger.log(Level.SEVERE, "Error while closing Connection ("+getGeneratedFileWithEnum(type)+")", e);
         }
         return false;
+    }
+
+    public boolean update(SnowFiles type, String qry) {
+        try {
+            Statement statement = getSQLiteConnection(type).createStatement();
+            statement.executeUpdate(qry);
+            statement.close();
+            return true;
+        }catch (SQLException e) {
+            e.printStackTrace();
+            if(!connect(type)){
+                DatabaseService service = plugin.getDatabaseService();
+                service.reset();
+                service.setSelected(SnowDatabaseType.FILES);
+                logger.info("I changed the Database-Type to Files, because I couldnt connect to SQLite!");
+                service.enable();
+            }else{
+                logger.warning("Error while updating your SQLite-Database, but you got reconnected!");
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+
+    public ResultSet query(SnowFiles type, String qry) {
+        ResultSet rs = null;
+        try {
+            Statement statement = getSQLiteConnection(type).createStatement();
+            rs = statement.executeQuery(qry);
+        }catch (SQLException e) {
+            if(!connect(type)){
+                DatabaseService service = plugin.getDatabaseService();
+                service.reset();
+                service.setSelected(SnowDatabaseType.FILES);
+                logger.info("I changed the Database-Type to Files, because I couldnt connect to SQLite! (If such problems persist and you don't know what to do, join my Discord: discord.timecoding.de)");
+                service.enable();
+            }else{
+                logger.warning("Error while querying your SQLite-Database, but you got reconnected!");
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return rs;
     }
 
     public boolean closeAll(){

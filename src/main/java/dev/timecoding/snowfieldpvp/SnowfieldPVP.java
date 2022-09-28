@@ -3,7 +3,9 @@ package dev.timecoding.snowfieldpvp;
 import dev.timecoding.snowfieldpvp.api.Metrics;
 import dev.timecoding.snowfieldpvp.config.ConfigHandler;
 import dev.timecoding.snowfieldpvp.config.LanguageHandler;
+import dev.timecoding.snowfieldpvp.database.DataHandler;
 import dev.timecoding.snowfieldpvp.database.DatabaseService;
+import dev.timecoding.snowfieldpvp.enums.SnowFiles;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +15,8 @@ public final class SnowfieldPVP extends JavaPlugin {
     private ConfigHandler config;
     private LanguageHandler lang;
     private DatabaseService databaseService;
+
+    private DataHandler dataHandler;
 
     @Override
     public void onEnable() {
@@ -41,6 +45,18 @@ public final class SnowfieldPVP extends JavaPlugin {
         lang.setup();
         //Load DatabaseService
         databaseService = new DatabaseService(this, true);
+        //Load Datahandler (IMPORTANT)
+        dataHandler = new DataHandler(this);
+
+        System.out.println(dataHandler.setupTables());
+        dataHandler.addTableColumn(SnowFiles.GENERALDATAS, "IMPORTANT3");
+        dataHandler.create(SnowFiles.GENERALDATAS, "IMPORTANT", "test2");
+        dataHandler.set(SnowFiles.GENERALDATAS, "important", "important", "important2", "IMPORTANT", "test2");
+        System.out.println(dataHandler.get(SnowFiles.GENERALDATAS, "important", "important", "IMPORTANT", "test"));
+    }
+
+    public DatabaseService getDatabaseService() {
+        return databaseService;
     }
 
     private void registerCommands(){
