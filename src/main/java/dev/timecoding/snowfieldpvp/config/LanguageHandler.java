@@ -1,6 +1,7 @@
 package dev.timecoding.snowfieldpvp.config;
 
 import dev.timecoding.snowfieldpvp.SnowfieldPVP;
+import dev.timecoding.snowfieldpvp.config.object.LanguageData;
 import dev.timecoding.snowfieldpvp.enums.SnowLanguage;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -36,8 +37,8 @@ public class LanguageHandler {
         configHandler.setString("Language", lang.name());
     }
 
-    public YamlConfiguration getSelectedLanguageConfig(){
-        return config;
+    public LanguageData getSelectedLanguageConfig(){
+        return new LanguageData(this, config);
     }
 
     public void saveSelectedLanguageConfig(){

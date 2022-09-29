@@ -48,11 +48,9 @@ public final class SnowfieldPVP extends JavaPlugin {
         //Load Datahandler (IMPORTANT)
         dataHandler = new DataHandler(this);
 
-        System.out.println(dataHandler.setupTables());
-        dataHandler.addTableColumn(SnowFiles.GENERALDATAS, "IMPORTANT3");
-        dataHandler.create(SnowFiles.GENERALDATAS, "IMPORTANT", "test2");
-        dataHandler.set(SnowFiles.GENERALDATAS, "important", "important", "important2", "IMPORTANT", "test2");
-        System.out.println(dataHandler.get(SnowFiles.GENERALDATAS, "important", "important", "IMPORTANT", "test"));
+        dataHandler.create(SnowFiles.GENERALDATAS, "IMPORTANT", "test3");
+        dataHandler.set(SnowFiles.GENERALDATAS, "UUID", "UUID", "LOL", "IMPORTANT", "test3");
+        System.out.println(dataHandler.get(SnowFiles.GENERALDATAS, "UUID", "UUID", "IMPORTANT", "test3"));
     }
 
     public DatabaseService getDatabaseService() {

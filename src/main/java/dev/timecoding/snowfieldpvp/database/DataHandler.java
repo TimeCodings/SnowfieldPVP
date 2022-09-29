@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DataHandler {
@@ -86,6 +87,14 @@ public class DataHandler {
                     }else{
                         logger.warning("Error while updating your MySQL-Database, but you got reconnected!");
                     }
+                }finally {
+                    if(rs != null){
+                        try {
+                            rs.close();
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 }
                 return ob;
             case SQLITE:
@@ -106,6 +115,14 @@ public class DataHandler {
                         service.enable();
                     }else{
                         logger.warning("Error while updating your SQLite-Database, but you got reconnected!");
+                    }
+                }finally {
+                    if(rssqlite != null){
+                        try {
+                            rssqlite.close();
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
                 return obje;
@@ -166,6 +183,54 @@ public class DataHandler {
         return false;
     }
 
+    private boolean columnExistsSQLite(SnowFiles type, SQLiteConnector connector, String name){
+        ResultSet rs = connector.query(type, "PRAGMA table_info("+type.name().toUpperCase()+");");
+        try {
+            while(rs.next()){
+                if(rs.getString("name") != null){
+                    if(rs.getString("name").equalsIgnoreCase(name)){
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error while getting Column-Status:", e);
+        }finally {
+            if(rs != null){
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean columnExistsMySQL(SnowFiles type, MySQLConnector connector, String name){
+        ResultSet rs = connector.query("PRAGMA table_info("+type.name().toUpperCase()+");");
+        try {
+            while(rs.next()){
+                if(rs.getString("name") != null){
+                    if(rs.getString("name").equalsIgnoreCase(name)){
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error while getting Column-Status:", e);
+        }finally {
+            if(rs != null){
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean addTableColumn(@NotNull SnowFiles type, String name){
         SnowDatabaseType dbtype = service.getDBType();
         DatabaseObject obj = service.getObject();
@@ -174,7 +239,10 @@ public class DataHandler {
                 //Cast to SQLITE
                 SQLiteConnector sqlite = (SQLiteConnector) obj.get();
                 //Execute update statement
-                boolean b = sqlite.update(type,"ALTER TABLE "+type.name().toUpperCase()+" ADD COLUMN IF NOT EXISTS "+name.toUpperCase()+" varchar(500);");
+                boolean b = true;
+                if(!columnExistsSQLite(type, sqlite, name.toUpperCase())){
+                    b = sqlite.update(type,"ALTER TABLE "+type.name().toUpperCase()+" ADD COLUMN "+name.toUpperCase()+" varchar(500);");
+                }
                 return b;
             case MYSQL:
                 //Cast to MYSQL

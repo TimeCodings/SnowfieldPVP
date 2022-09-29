@@ -97,11 +97,19 @@ public class SQLiteConnector {
     }
 
     private File getGeneratedFile(){
-        return new File(plugin.getDataFolder().toString(), getTypeString()+".db");
+        File f = new File(plugin.getDataFolder().toString(), getTypeString().toLowerCase()+".db");
+        if(subfolderEnabled()){
+            f = new File(plugin.getDataFolder().toString()+"//"+subfolderName(), getTypeString().toLowerCase()+".db");
+        }
+        return f;
     }
 
     private File getGeneratedFileWithEnum(SnowFiles type){
-        return new File(plugin.getDataFolder().toString(), type.name().toString().toLowerCase()+".db");
+        File f = new File(plugin.getDataFolder().toString(), type.name().toString().toLowerCase()+".db");
+        if(subfolderEnabled()){
+            f = new File(plugin.getDataFolder().toString()+"//"+subfolderName(), type.name().toString().toLowerCase()+".db");
+        }
+        return f;
     }
 
     private boolean fileExists(){
@@ -141,7 +149,10 @@ public class SQLiteConnector {
             Class.forName("org.sqlite.JDBC");
             if(fileExistsWithEnum(type)){
                 if(!connection.containsKey(type)){
+                    System.out.println("CONNECTION "+type);
                     Connection con = DriverManager.getConnection("jdbc:sqlite:" + getGeneratedFileWithEnum(type).getPath());
+                    con.setAutoCommit(false);
+                    con.commit();
                     connection.put(type, con);
                     return con;
                 }else if(connection.containsKey(type) && connection.get(type).isClosed()){
@@ -153,15 +164,12 @@ public class SQLiteConnector {
 
     public boolean connect(SnowFiles type){
         try{
-            System.out.println(type);
         Connection c = getSQLiteConnection(type);
         logger.info("Successfully connected to your SQLite-Database! ("+getGeneratedFileWithEnum(type).getName()+")");
         return true;
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
             logger.log(Level.SEVERE, "Error while getting Connection ("+getGeneratedFileWithEnum(type).getName()+")", e);
         } catch (SQLException e) {
-            e.printStackTrace();
                 DatabaseService service = plugin.getDatabaseService();
                 service.reset();
                 service.setSelected(SnowDatabaseType.FILES);

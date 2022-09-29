@@ -3,6 +3,7 @@ package dev.timecoding.snowfieldpvp.config;
 import dev.timecoding.snowfieldpvp.SnowfieldPVP;
 import dev.timecoding.snowfieldpvp.database.file.FileManager;
 import dev.timecoding.snowfieldpvp.enums.SnowFiles;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -62,7 +63,7 @@ public class ConfigHandler {
 
     public String getString(String key){
         if(keyExists(key)){
-            return cfg.getString(key);
+            return ChatColor.translateAlternateColorCodes('&', cfg.getString(key));
         }
         return null;
     }
